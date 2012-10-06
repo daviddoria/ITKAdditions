@@ -33,22 +33,22 @@ namespace Accessor
  * \ingroup ImageAdaptors
  * \ingroup ITKImageAdaptors
  */
-template< class TInternalType, typename TLambda >
+template< class TInternalType, typename TExternalType, typename TLambda >
 class ITK_EXPORT LambdaPixelAccessor
 {
 public:
   /** Required by ImageAdaptor. */
   typedef TInternalType InternalType;
-  typedef TInternalType ExternalType;
+  typedef TExternalType ExternalType;
 
-  std::function<InternalType(InternalType)> m_Lambda;
+  std::function<TExternalType(InternalType)> m_Lambda;
 
   void SetLambda(TLambda lambda)
   {
     m_Lambda = lambda;
   }
 
-  inline TInternalType Get(const TInternalType & input) const
+  inline TExternalType Get(const TInternalType & input) const
   { return m_Lambda( input ); }
 
 };
@@ -61,25 +61,25 @@ public:
  * \ingroup ImageAdaptors
  * \ingroup ITKImageAdaptors
  */
-template< class TImage, typename TLambda >
+template< class TImage, typename TExternalType, typename TLambda >
 class ITK_EXPORT LambdaImageAdaptor:public
   ImageAdaptor< TImage,
                 Accessor::LambdaPixelAccessor<
-                  typename TImage::PixelType,
+                  typename TImage::PixelType, TExternalType,
                   TLambda >   >
 {
 public:
   /** Standard class typedefs. */
   typedef LambdaImageAdaptor Self;
   typedef ImageAdaptor< TImage, Accessor::LambdaPixelAccessor<
-                          typename TImage::PixelType,
+                          typename TImage::PixelType, TExternalType,
                           TLambda > >  Superclass;
 
   typedef SmartPointer< Self >       Pointer;
   typedef SmartPointer< const Self > ConstPointer;
 
   typedef Accessor::LambdaPixelAccessor<
-    typename TImage::PixelType,
+    typename TImage::PixelType, TExternalType,
     TLambda >  AccessorType;
 
   void SetLambda(TLambda lambda)

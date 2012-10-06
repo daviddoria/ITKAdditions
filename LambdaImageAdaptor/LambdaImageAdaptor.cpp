@@ -19,29 +19,59 @@ int main(int argc, char** argv)
 
   CreateImage(image.GetPointer());
 
-  // Create a lambda
-  auto myLambda = [](const ImageType::PixelType& pixel) {
-      return pixel + 3;
-   };
-
-  // Create the adaptor
-  typedef itk::LambdaImageAdaptor<  ImageType,
-    decltype(myLambda) > LambdaAdaptorType;
-
-  LambdaAdaptorType::Pointer adaptor = LambdaAdaptorType::New();
-  adaptor->SetImage(image);
-  adaptor->SetLambda(myLambda);
-
-  // Output the result of applying the lambda to every pixel
-  itk::ImageRegionIterator<LambdaAdaptorType>
-  outputIterator(adaptor,adaptor->GetLargestPossibleRegion());
-
-  while(!outputIterator.IsAtEnd())
+  // A demo of converting to the same type of pixel
   {
-    std::cout << outputIterator.Get();
-    ++outputIterator;
+    // Create a lambda
+    auto myLambda = [](const ImageType::PixelType& pixel) {
+        return pixel + 3;
+     };
+
+    // Create the adaptor
+    typedef itk::LambdaImageAdaptor<  ImageType, int,
+      decltype(myLambda) > LambdaAdaptorType;
+
+    LambdaAdaptorType::Pointer adaptor = LambdaAdaptorType::New();
+    adaptor->SetImage(image);
+    adaptor->SetLambda(myLambda);
+
+    // Output the result of applying the lambda to every pixel
+    itk::ImageRegionIterator<LambdaAdaptorType>
+    outputIterator(adaptor,adaptor->GetLargestPossibleRegion());
+
+    while(!outputIterator.IsAtEnd())
+    {
+      std::cout << outputIterator.Get() << " ";
+      ++outputIterator;
+    }
+    std::cout << std::endl;
   }
-  std::cout << std::endl;
+
+  // A demo of converting to a different type of pixel
+  {
+    // Create a lambda
+    auto myLambda = [](const ImageType::PixelType& pixel) {
+        return static_cast<float>(static_cast<float>(pixel) + 3.1f);
+     };
+
+    // Create the adaptor (we have to know that the lambda will return a float.
+    typedef itk::LambdaImageAdaptor<  ImageType, float,
+      decltype(myLambda) > LambdaAdaptorType;
+
+    LambdaAdaptorType::Pointer adaptor = LambdaAdaptorType::New();
+    adaptor->SetImage(image);
+    adaptor->SetLambda(myLambda);
+
+    // Output the result of applying the lambda to every pixel
+    itk::ImageRegionIterator<LambdaAdaptorType>
+    outputIterator(adaptor,adaptor->GetLargestPossibleRegion());
+
+    while(!outputIterator.IsAtEnd())
+    {
+      std::cout << outputIterator.Get() << " ";
+      ++outputIterator;
+    }
+    std::cout << std::endl;
+  }
 
   return EXIT_SUCCESS;
 }
@@ -61,7 +91,7 @@ void CreateImage(TImage* const image)
 
   while(!imageIterator.IsAtEnd())
   {
-    std::cout << counter;
+    std::cout << counter << " ";
     imageIterator.Set(counter);
     counter++;
     ++imageIterator;
